@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { assets } from '../../assets/assets';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
@@ -8,6 +8,18 @@ const NavBar = () => {
   const { token, setToken, userData } = useContext(UserContext);
 
   const [showMenu, setShowMenu] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
+
+  const dropdownRef = useRef(null);
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpenDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const logout = () => {
     setToken(false);
@@ -25,7 +37,7 @@ const NavBar = () => {
         alt="Logo"
       />
 
-      {/* ------- Desktop Menu ------- */}
+      {/* Desktop Menu */}
       <ul className="hidden md:flex items-center gap-6 font-medium">
         {[
           { name: 'HOME', path: '/' },
@@ -46,37 +58,44 @@ const NavBar = () => {
         ))}
       </ul>
 
-      {/* ------- Right Actions ------- */}
+      {/* Right Section */}
       <div className="flex items-center gap-4">
 
         {/* Profile Dropdown */}
         {token && userData ? (
-          <div className="relative group cursor-pointer flex items-center gap-2">
+          <div
+            className="relative flex items-center gap-2 cursor-pointer"
+            onClick={() => setOpenDropdown(prev => !prev)}
+            ref={dropdownRef}
+          >
             <img className="w-8 h-8 rounded-full object-cover" src={userData.image} alt="User" />
             <img className="w-2.5" src={assets.dropdown_icon} alt="Dropdown" />
 
-            {/* Dropdown Box */}
-            <div className="absolute top-10 right-0 bg-stone-100 rounded shadow-md 
-                            w-44 py-3 px-3 flex-col gap-3 text-gray-600 font-medium hidden group-hover:flex z-30">
-              <p onClick={() => navigate('/my-profile')} className="hover:text-black cursor-pointer">
-                My Profile
-              </p>
-              <p onClick={() => navigate('/my-appointments')} className="hover:text-black cursor-pointer">
-                My Appointments
-              </p>
-              <p onClick={() => navigate('/admin/login')} className="hover:text-black cursor-pointer">
-                Admin Login
-              </p>
-              <p onClick={() => navigate('/doctor/login')} className="hover:text-black cursor-pointer">
-                Doctor Login
-              </p>
-              <p onClick={logout} className="hover:text-black cursor-pointer">
-                Logout
-              </p>
-            </div>
+            {/* Click Dropdown Menu */}
+            {openDropdown && (
+              <div
+                className="absolute top-10 right-0 bg-stone-100 rounded shadow-md 
+                w-44 py-3 px-3 flex flex-col gap-3 text-gray-600 font-medium z-30"
+              >
+                <p onClick={() => navigate('/my-profile')} className="hover:text-black cursor-pointer">
+                  My Profile
+                </p>
+                <p onClick={() => navigate('/my-appointments')} className="hover:text-black cursor-pointer">
+                  My Appointments
+                </p>
+                <p onClick={() => navigate('/admin/login')} className="hover:text-black cursor-pointer">
+                  Admin Login
+                </p>
+                <p onClick={() => navigate('/doctor/login')} className="hover:text-black cursor-pointer">
+                  Doctor Login
+                </p>
+                <p onClick={logout} className="hover:text-black cursor-pointer">
+                  Logout
+                </p>
+              </div>
+            )}
           </div>
         ) : (
-          /* Create Account (Desktop Only) */
           <button
             onClick={() => navigate('/login')}
             className="hidden md:block bg-primary text-white px-8 py-3 rounded-full font-light hover:bg-primary/90 transition"
@@ -94,7 +113,7 @@ const NavBar = () => {
         />
       </div>
 
-      {/* ------- Mobile Menu ------- */}
+      {/* Mobile Menu */}
       <div
         className={`fixed top-0 right-0 h-full z-50 bg-white transition-all duration-300
         ${showMenu ? 'w-full max-w-[300px]' : 'w-0 overflow-hidden'}`}
