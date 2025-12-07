@@ -4,7 +4,7 @@ import group_profiles from './group_profiles.png'
 import profile_pic from './profile_pic.png'
 import contact_image from './contact_image.png'
 import about_image from './about_image.png'
-import logo from './logo.svg'
+import logo from './logo.png'
 import dropdown_icon from './dropdown_icon.svg'
 import menu_icon from './menu_icon.svg'
 import cross_icon from './cross_icon.png'
@@ -25,7 +25,6 @@ import appointments_icon from './appointments_icon.svg'
 import patients_icon from './patients_icon.svg'
 import list_icon from './list_icon.svg'
 import earning_icon from './earning_icon.svg'
-import doctro from './doctro.png'
 import doc1 from './doc1.png'
 import doc2 from './doc2.png'
 import doc3 from './doc3.png'
@@ -81,7 +80,7 @@ export const assets = {
     patients_icon,
     list_icon,
     earning_icon,
-    doctro
+    
 }
 
 export const specialityData = [

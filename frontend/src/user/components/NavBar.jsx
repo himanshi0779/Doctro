@@ -33,7 +33,7 @@ const NavBar = () => {
       <img
         onClick={() => navigate('/')}
         className="w-40 sm:w-44 cursor-pointer"
-        src={assets.doctro}
+        src={assets.logo}
         alt="Logo"
       />
 
