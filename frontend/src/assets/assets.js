@@ -15,7 +15,6 @@ import info_icon from './info_icon.svg'
 import upload_icon from './upload_icon.png'
 import stripe_logo from './stripe_logo.png'
 import razorpay_logo from './razorpay_logo.png'
-import admin_logo from './admin_logo.svg'
 import home_icon from './home_icon.svg'
 import appointment_icon from './appointment_icon.svg'
 import people_icon from './people_icon.svg'
@@ -70,7 +69,6 @@ export const assets = {
     razorpay_logo,
     cancel_icon,
     tick_icon,
-    admin_logo,
     home_icon,
     appointment_icon,
     people_icon,
