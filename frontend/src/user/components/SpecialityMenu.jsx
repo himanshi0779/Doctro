@@ -5,32 +5,33 @@ import { Link } from "react-router-dom";
 const SpecialityMenu = () => {
   return (
     <div
-      className="flex flex-col items-center gap-4 py-16 text-gray-800 px-4"
-      id="speciality"
+      className="w-full flex justify-center"
     >
-      {/* Heading */}
-      <h1 className="text-2xl sm:text-3xl font-semibold text-center">
-        Find by Speciality
-      </h1>
+      <div
+        className="max-w-5xl w-full flex flex-col items-center gap-4 py-16 text-gray-800 px-4"
+        id="speciality"
+      >
+        {/* Heading */}
+        <h1 className="text-2xl sm:text-3xl font-semibold text-center">
+          Find by Speciality
+        </h1>
 
-      <p className="text-sm text-center sm:w-1/2 md:w-1/3 text-gray-600">
-        Simply browse through our extensive list of trusted doctors, schedule
-        your appointment hassle-free.
-      </p>
+        <p className="text-sm text-center sm:w-1/2 md:w-1/3 text-gray-600">
+          Simply browse through our extensive list of trusted doctors, schedule
+          your appointment hassle-free.
+        </p>
 
-      {/* Wrapper to center on desktop */}
-      <div className="w-full flex justify-center">
+        {/* Scroll on mobile - Centered grid on desktop */}
         <div
           className="
-            flex sm:justify-center
-            gap-6 sm:gap-10 pt-6
-            max-w-[900px] w-full
-            overflow-x-auto sm:overflow-visible
-            whitespace-nowrap sm:whitespace-normal
+            flex gap-6 sm:gap-10 pt-6
+            w-full
+            overflow-x-auto
+            whitespace-nowrap
             scrollbar-none
             px-2
+            sm:justify-center    /* <-- Centers on desktop */
           "
-          style={{ scrollSnapType: "x mandatory" }}
         >
           {specialityData.map((item, index) => (
             <Link
@@ -43,7 +44,6 @@ const SpecialityMenu = () => {
                 cursor-pointer hover:-translate-y-2 transition-all duration-500
                 w-24
               "
-              style={{ scrollSnapAlign: "start" }}
             >
               <img
                 className="w-16 sm:w-24 mb-2"
