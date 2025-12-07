@@ -22,7 +22,7 @@ const Navbar = () => {
       {/* Left Section */}
       <div className="flex items-center gap-3">
         <img
-          src={assets.admin_logo}
+          src={assets.logo}
           alt="Admin Logo"
           className="w-28 sm:w-36 md:w-40 cursor-pointer flex-shrink-0"
           onClick={() => navigate("/admin")}
