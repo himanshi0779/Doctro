@@ -20,7 +20,7 @@ connectCloudinary()
 
 app.use(express.json())
 app.use(cors({
-  origin: 'https://prescrepto.vercel.app',
+  origin: ['https://prescrepto.vercel.app','http://localhost:3000'],
   credentials: true,
 }));
 
