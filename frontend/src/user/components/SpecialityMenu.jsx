@@ -8,6 +8,7 @@ const SpecialityMenu = () => {
       className="flex flex-col items-center gap-4 py-16 text-gray-800 px-4"
       id="speciality"
     >
+      {/* Heading */}
       <h1 className="text-2xl sm:text-3xl font-semibold text-center">
         Find by Speciality
       </h1>
@@ -17,12 +18,13 @@ const SpecialityMenu = () => {
         your appointment hassle-free.
       </p>
 
-      {/* ⭐ Desktop centered – Mobile scroll */}
-      <div className="w-full sm:flex sm:justify-center">
+      {/* Wrapper to center on desktop */}
+      <div className="w-full flex justify-center">
         <div
           className="
-            flex gap-6 sm:gap-10 pt-6
-            w-full sm:w-auto
+            flex sm:justify-center
+            gap-6 sm:gap-10 pt-6
+            max-w-[900px] w-full
             overflow-x-auto sm:overflow-visible
             whitespace-nowrap sm:whitespace-normal
             scrollbar-none
@@ -53,7 +55,6 @@ const SpecialityMenu = () => {
           ))}
         </div>
       </div>
-
     </div>
   );
 };
