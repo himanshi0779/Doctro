@@ -11,7 +11,7 @@ const Footer = () => {
         <div>
           <img className='mb-5 w-40' src={assets.logo} alt='Logo' />
           <p className='text-gray-600 leading-6'>
-            Prescripto is a healthcare-focused application designed to streamline doctor-patient interactions by providing digital solutions for appointments, prescriptions, and patient management. It allows doctors to create and share prescriptions electronically, manage their schedules, and even generate payment links for consultations. Patients can book appointments, access their prescriptions digitally, and make payments online, ensuring a seamless and efficient experience.
+            Doctro is a healthcare-focused application designed to streamline doctor-patient interactions by providing digital solutions for appointments, prescriptions, and patient management. It allows doctors to create and share prescriptions electronically, manage their schedules, and even generate payment links for consultations. Patients can book appointments, access their prescriptions digitally, and make payments online, ensuring a seamless and efficient experience.
           </p>
         </div>
 

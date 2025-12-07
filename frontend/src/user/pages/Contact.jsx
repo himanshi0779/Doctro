@@ -37,7 +37,7 @@ const Contact = () => {
           </p>
 
           <p className="font-semibold text-lg text-gray-700">
-            Careers at PRESCRIPTO
+            Careers at DOCTRO
           </p>
 
           <p className="text-gray-500">
