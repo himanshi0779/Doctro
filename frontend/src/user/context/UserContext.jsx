@@ -7,7 +7,6 @@ export const UserContext = createContext();
 const UserContextProvider = (props) => {
 
     const currencySymbol = '$';
-    // Support both Vite (import.meta.env) and Create React App (process.env)
     const backendUrl = import.meta.env?.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
     
     const [doctors, setDoctors] = useState([]);
@@ -19,7 +18,7 @@ const UserContextProvider = (props) => {
     // Fetch doctors list for public homepage
     const getDoctorsData = async () => {
         try {
-            const { data } = await axios.get(backendUrl + '/api/doctor/list');
+            const { data } = await axios.get(`${backendUrl}/api/doctor/list`);
             if (data.success) {
                 setDoctors(data.doctors);
             } else {
@@ -35,34 +34,31 @@ const UserContextProvider = (props) => {
     const loadUserProfileData = async () => {
         const currentRole = localStorage.getItem('role') || role;
 
-        // Skip fetching profile if not logged in or if user is Admin / Doctor
         if (!token) return setUserData(false);
         if (currentRole && currentRole !== 'user') return;
 
         setLoadingUser(true);
         try {
-            // Note: Make sure backend header key matches what your middleware expects (token or atoken)
-            const { data } = await axios.get(backendUrl + '/api/user/get-profile', { 
-                headers: { token, atoken: token } 
+            // Send token in both standard Authorization header and custom token header
+            const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, { 
+                headers: { 
+                    token: token,
+                    atoken: token,
+                    Authorization: `Bearer ${token}` 
+                } 
             });
 
             if (data.success) {
                 setUserData(data.userData);
             } else {
-                // If it fails for a normal user, clear session
-                setToken(null);
-                setRole('');
-                localStorage.removeItem('token');
-                localStorage.removeItem('role');
-                toast.error(data.message);
+                console.warn("Profile load returned unsuccessful:", data.message);
+                toast.error(data.message || "Could not load user profile");
             }
         } catch (error) {
-            console.log("Profile Load Error:", error);
-            setToken(null);
-            setRole('');
-            localStorage.removeItem('token');
-            localStorage.removeItem('role');
-            setUserData(false);
+            console.error("Profile Load Error:", error);
+            // Only notify the error without clearing session prematurely
+            const msg = error.response?.data?.message || error.message;
+            toast.error(msg);
         } finally {
             setLoadingUser(false);
         }

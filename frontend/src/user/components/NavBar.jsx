@@ -1,36 +1,21 @@
-import React, { useContext, useState, useEffect, useRef} from 'react';
+import React, { useContext, useState } from 'react';
 import { assets } from '../../assets/assets';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { token, setToken, userData } = useContext(UserContext);
-
+  const { setToken } = useContext(UserContext);
   const [showMenu, setShowMenu] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(false);
-
-  const dropdownRef = useRef(null);
-  useEffect(() => {
-    const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpenDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   const logout = () => {
-  // 1. Clear session storage
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-
-  // 2. Redirect to Unified Login page
-  // Using window.location.href forces a full state refresh, 
-  // preventing stale auth states in App.jsx
-  window.location.href = "/login";
-  }
+    if (setToken) setToken(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("aToken");
+    localStorage.removeItem("dToken");
+    window.location.href = "/login";
+  };
 
   return (
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-gray-300 px-4 sm:px-6 lg:px-0">
@@ -43,7 +28,7 @@ const NavBar = () => {
         alt="Logo"
       />
 
-      {/* Desktop Menu */}
+      {/* Desktop Navigation Links */}
       <ul className="hidden md:flex items-center gap-6 font-medium">
         {[
           { name: 'HOME', path: '/' },
@@ -64,45 +49,14 @@ const NavBar = () => {
         ))}
       </ul>
 
-      {/* Right Section */}
+      {/* Right Section: Desktop Logout Button */}
       <div className="flex items-center gap-4">
-
-        {/* Profile Dropdown */}
-        {token && userData ? (
-          <div
-            className="relative flex items-center gap-2 cursor-pointer"
-            onClick={() => setOpenDropdown(prev => !prev)}
-            ref={dropdownRef}
-          >
-            <img className="w-8 h-8 rounded-full object-cover" src={userData.image} alt="User" />
-            <img className="w-2.5" src={assets.dropdown_icon} alt="Dropdown" />
-
-            {/* Click Dropdown Menu */}
-            {openDropdown && (
-              <div
-                className="absolute top-10 right-0 bg-stone-100 rounded shadow-md 
-                w-44 py-3 px-3 flex flex-col gap-3 text-gray-600 font-medium z-30"
-              >
-                <p onClick={() => navigate('/my-profile')} className="hover:text-black cursor-pointer">
-                  My Profile
-                </p>
-                <p onClick={() => navigate('/my-appointments')} className="hover:text-black cursor-pointer">
-                  My Appointments
-                </p>
-                <p onClick={logout} className="hover:text-black cursor-pointer">
-                  Logout
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            onClick={() => navigate('/login')}
-            className="hidden md:block bg-primary text-white px-8 py-3 rounded-full font-light hover:bg-primary/90 transition"
-          >
-            Create Account
-          </button>
-        )}
+        <button
+          onClick={logout}
+          className="hidden md:block bg-primary text-white px-8 py-2.5 rounded-full font-medium hover:bg-primary/90 transition cursor-pointer"
+        >
+          Logout
+        </button>
 
         {/* Mobile Menu Icon */}
         <img
@@ -113,7 +67,7 @@ const NavBar = () => {
         />
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Drawer */}
       <div
         className={`fixed top-0 right-0 h-full z-50 bg-white transition-all duration-300
         ${showMenu ? 'w-full max-w-[300px]' : 'w-0 overflow-hidden'}`}
@@ -142,17 +96,13 @@ const NavBar = () => {
             <p className="py-2">CONTACT</p>
           </NavLink>
 
-          {!token && (
-            <button
-              onClick={() => {
-                navigate('/login');
-                setShowMenu(false);
-              }}
-              className="bg-primary text-white px-6 py-2 rounded-full mt-4"
-            >
-              Create Account
-            </button>
-          )}
+          {/* Mobile Logout Button */}
+          <button
+            onClick={logout}
+            className="bg-primary text-white px-6 py-2.5 rounded-full mt-4 w-full text-base cursor-pointer hover:bg-primary/90 transition"
+          >
+            Logout
+          </button>
         </ul>
       </div>
     </div>
