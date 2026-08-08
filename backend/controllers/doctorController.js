@@ -28,30 +28,6 @@ const doctorList=async(req,res)=>{
     }
 }
 
-const loginDoctor=async(req,res)=>{
-    try{
-        const {email,password}=req.body
-        const doctor=await doctorModel.findOne({email})
-
-
-        if(!doctor){
-            return res.json({success:false, message:"Invalid credentials"})
-        }
-
-        const isMatch= await bcrypt.compare(password,doctor.password)
-
-        if(!isMatch){
-            return res.json({success:false, message:"Doctor does not exist"})
-        }
-        const token=jwt.sign({id:doctor._id, email:doctor.email},process.env.JWT_SECRET)
-        res.json({success:true,message:"LoggedIn",token, doctor:{ id:doctor._id, name:doctor.name, email: doctor.email}})
-        
-    }catch(error){
-        console.log(error)
-        res.json({success:false,message:error.message})
-    }
-}
-
 const appointmentsDoctor=async(req,res)=>{
     try{
         const docId=req.doctorId;
@@ -159,4 +135,4 @@ const updateDoctorProfile=async(req,res)=>{
     }
 }
 
-export {doctorList,loginDoctor,appointmentsDoctor, appointmentComplete, appointmentCancel, doctorDashboard, doctorProfile, updateDoctorProfile, changeAvailability}
+export {doctorList,appointmentsDoctor, appointmentComplete, appointmentCancel, doctorDashboard, doctorProfile, updateDoctorProfile, changeAvailability}

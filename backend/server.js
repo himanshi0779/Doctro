@@ -7,6 +7,7 @@ import express from 'express'
 import cors from 'cors'
 import connectDB from './config/mongodb.js'
 import connectCloudinary from './config/cloudinary.js'
+import authRouter from "./routes/authRoute.js";
 import adminRouter from './routes/adminRoute.js'
 import doctorRouter from './routes/doctorRoute.js'
 import userRouter from './routes/userRoute.js'
@@ -33,7 +34,7 @@ export const razorpayInstance=new Razorpay({
 })
 console.log("RAZORPAY TEST:",process.env.RAZORPAY_KEY_ID, process.env.RAZORPAY_KEY_SECRET);
 
-
+app.use("/api/auth", authRouter);
 app.use('/api/admin', adminRouter)
 app.use('/api/doctor',doctorRouter)
 app.use('/api/user',userRouter)
