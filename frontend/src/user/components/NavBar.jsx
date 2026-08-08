@@ -22,9 +22,15 @@ const NavBar = () => {
   }, []);
 
   const logout = () => {
-    setToken(false);
-    localStorage.removeItem('token');
-  };
+  // 1. Clear session storage
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+
+  // 2. Redirect to Unified Login page
+  // Using window.location.href forces a full state refresh, 
+  // preventing stale auth states in App.jsx
+  window.location.href = "/login";
+  }
 
   return (
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-gray-300 px-4 sm:px-6 lg:px-0">
@@ -82,12 +88,6 @@ const NavBar = () => {
                 </p>
                 <p onClick={() => navigate('/my-appointments')} className="hover:text-black cursor-pointer">
                   My Appointments
-                </p>
-                <p onClick={() => navigate('/admin/login')} className="hover:text-black cursor-pointer">
-                  Admin Login
-                </p>
-                <p onClick={() => navigate('/doctor/login')} className="hover:text-black cursor-pointer">
-                  Doctor Login
                 </p>
                 <p onClick={logout} className="hover:text-black cursor-pointer">
                   Logout

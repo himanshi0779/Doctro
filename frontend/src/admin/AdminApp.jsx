@@ -14,9 +14,9 @@ import AllAppointments from "./pages/AllAppointments";
 function AdminApp() {
   const { aToken } = useContext(AdminContext);
 
-  // Require login for admin portal
+  // Require login for admin portal — redirect to unified /login if missing aToken
   if (!aToken) {
-    return <Navigate to="/admin/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -37,7 +37,7 @@ function AdminApp() {
           <Route path="doctor-list" element={<DoctorsList />} />
 
           {/* Invalid admin URLs → redirect to dashboard */}
-          <Route path="*" element={<Navigate to="/admin/dashboard" />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
 
       </div>

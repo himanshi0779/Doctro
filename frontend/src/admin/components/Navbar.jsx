@@ -9,11 +9,17 @@ const Navbar = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   const logout = () => {
-    if (aToken) {
-      setAToken("");
-      localStorage.removeItem("aToken");
-    }
-    navigate("/admin/login");
+    // 1. Reset Admin Context state
+    if (setAToken) setAToken("");
+
+    // 2. Clear all local storage authentication items
+    localStorage.removeItem("aToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("dToken");
+
+    // 3. Force hard redirect to clear all React in-memory states
+    window.location.href = "/login";
   };
 
   return (
@@ -37,7 +43,7 @@ const Navbar = () => {
       <div className="hidden md:flex items-center gap-4">
         <button
           onClick={logout}
-          className="bg-[#5F65FF] text-white text-sm sm:text-base px-4 sm:px-6 py-1.5 sm:py-2 rounded-full hover:bg-[#4a54cc] transition"
+          className="bg-[#5F65FF] text-white text-sm sm:text-base px-4 sm:px-6 py-1.5 sm:py-2 rounded-full hover:bg-[#4a54cc] transition cursor-pointer"
         >
           Logout
         </button>
@@ -45,7 +51,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Button */}
       <button
-        className="md:hidden bg-gray-200 p-2 rounded-full"
+        className="md:hidden bg-gray-200 p-2 rounded-full cursor-pointer"
         onClick={() => setShowSidebar(true)}
       >
         <img
@@ -61,7 +67,7 @@ const Navbar = () => {
 
           {/* Close Button */}
           <button
-            className="self-end"
+            className="self-end cursor-pointer"
             onClick={() => setShowSidebar(false)}
           >
             <img
@@ -115,7 +121,7 @@ const Navbar = () => {
           {/* Logout Button in Sidebar */}
           <button
             onClick={logout}
-            className="bg-[#5F65FF] text-white text-sm px-4 py-2 rounded-full hover:bg-[#4a54cc] transition mt-6"
+            className="bg-[#5F65FF] text-white text-sm px-4 py-2 rounded-full hover:bg-[#4a54cc] transition mt-6 cursor-pointer"
           >
             Logout
           </button>
