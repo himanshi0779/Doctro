@@ -2,3 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
+/* -------------------------------------------------------------------------- */
+/* Complete Dark Mode Engine                                                 */
+/* -------------------------------------------------------------------------- */
+
+html.dark, 
+html.dark body,
+html.dark #root {
+  background-color: #111827 !important; /* dark:bg-gray-900 */
+  color: #f3f4f6 !important;
+}
+
+/* 1. Catch all standard light background utility classes */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-slate-50,
+.dark .bg-slate-100,
+.dark .bg-stone-50,
+.dark .bg-stone-100,
+.dark .bg-blue-50,
+.dark .bg-indigo-50,
+.dark .bg-sky-50 {
+  background-color: #1f2937 !important; /* dark:bg-gray-800 */
+}
+
+/* 2. Catch Prescrepto custom hex background colors (e.g. bg-[#F8F9FD]) */
+.dark [class*="bg-[#F"],
+.dark [class*="bg-[#f"] {
+  background-color: #111827 !important;
+}
+
+/* 3. Sub-cards, hovered rows, & secondary sections */
+.dark .bg-gray-200,
+.dark .bg-slate-200,
+.dark .bg-stone-200,
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-stone-50:hover {
+  background-color: #374151 !important; /* dark:bg-gray-700 */
+}
+
+/* 4. Form inputs, dropdowns, & textareas */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  border-color: #4b5563 !important;
+}
+
+/* 5. Tables, lists, & table row borders */
+.dark table,
+.dark th,
+.dark td,
+.dark tr {
+  border-color: #374151 !important;
+}
+
+.dark tr:hover {
+  background-color: #374151 !important;
+}
+
+/* 6. All light borders & dividers */
+.dark .border,
+.dark .border-b,
+.dark .border-t,
+.dark .border-l,
+.dark .border-r,
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-stone-200,
+.dark .border-slate-200 {
+  border-color: #374151 !important;
+}
+
+/* 7. Text contrast fixes for headings & body copy */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #ffffff !important;
+}
+
+.dark p, 
+.dark span, 
+.dark li, 
+.dark label {
+  color: #e5e7eb;
+}
+
+.dark .text-gray-400,
+.dark .text-gray-500,
+.dark .text-gray-600,
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-stone-500,
+.dark .text-stone-600,
+.dark .text-slate-500,
+.dark .text-slate-600 {
+  color: #d1d5db !important;
+}

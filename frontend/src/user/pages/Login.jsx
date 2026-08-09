@@ -15,12 +15,32 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  // 1. Clear fields every time the page loads or state changes
+  // Dark Mode State
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+
+  // Sync dark class on document root (<html>)
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+  };
+
+  // Clear fields every time the state changes
   useEffect(() => {
     setEmail("");
     setPassword("");
     setName("");
-  }, [state]); // Also clears when switching between "Login" and "Sign Up"
+  }, [state]);
 
   const redirectByRole = (role) => {
     if (role === "admin") {
@@ -89,86 +109,126 @@ const Login = () => {
   };
 
   return (
-    <form
-      onSubmit={onSubmitHandler}
-      autoComplete="off" /* Prevents browser auto-filling form */
-      className="min-h-[80vh] flex items-center"
-    >
-      <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
-        <p className="text-2xl font-semibold">
-          {state === "Sign Up" ? "Create Account" : "Account Login"}
-        </p>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <form
+        onSubmit={onSubmitHandler}
+        autoComplete="off"
+        className="w-full max-w-md"
+      >
+        <div className="relative flex flex-col gap-4 m-auto p-8 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-2xl text-zinc-600 dark:text-gray-300 text-sm shadow-xl transition-all duration-200">
+          
+          {/* Top Header Row with Theme Toggle */}
+          <div className="flex justify-between items-center w-full">
+            <div>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">
+                {state === "Sign Up" ? "Create Account" : "Account Login"}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Please {state === "Sign Up" ? "sign up" : "log in"} to continue
+              </p>
+            </div>
 
-        <p>Please {state === "Sign Up" ? "sign up" : "log in"} to continue</p>
+            {/* Dark Mode Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              aria-label="Toggle Dark Mode"
+              className="p-2.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer"
+            >
+              {darkMode ? (
+                /* Sun Icon */
+                <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                /* Moon Icon */
+                <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+              )}
+            </button>
+          </div>
 
-        {state === "Sign Up" && (
+          {/* Form Fields */}
+          {state === "Sign Up" && (
+            <div className="w-full">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                Full Name
+              </label>
+              <input
+                className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg w-full p-2.5 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary transition"
+                type="text"
+                onChange={(e) => setName(e.target.value)}
+                value={name}
+                autoComplete="off"
+                required
+              />
+            </div>
+          )}
+
           <div className="w-full">
-            <p>Full Name</p>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+              Email
+            </label>
             <input
-              className="border border-zinc-300 rounded w-full p-2 mt-1"
-              type="text"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg w-full p-2.5 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary transition"
+              type="email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
               autoComplete="off"
               required
             />
           </div>
-        )}
 
-        <div className="w-full">
-          <p>Email</p>
-          <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
-            type="email"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            autoComplete="off"
-            required
-          />
+          <div className="w-full">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+              Password
+            </label>
+            <input
+              className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg w-full p-2.5 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary transition"
+              type="password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="bg-primary text-white w-full py-2.5 rounded-lg text-base font-medium mt-2 hover:bg-primary/90 transition shadow-md cursor-pointer"
+          >
+            {state === "Sign Up" ? "Create Account" : "Login"}
+          </button>
+
+          {/* Footer State Switcher */}
+          <div className="text-center mt-2 text-gray-600 dark:text-gray-400">
+            {state === "Sign Up" ? (
+              <p>
+                Already have an account?{" "}
+                <span
+                  onClick={() => setState("Login")}
+                  className="text-primary dark:text-indigo-400 underline font-semibold cursor-pointer"
+                >
+                  Login here
+                </span>
+              </p>
+            ) : (
+              <p>
+                Want to create a new account?{" "}
+                <span
+                  onClick={() => setState("Sign Up")}
+                  className="text-primary dark:text-indigo-400 underline font-semibold cursor-pointer"
+                >
+                  Click here
+                </span>
+              </p>
+            )}
+          </div>
         </div>
-
-        <div className="w-full">
-          <p>Password</p>
-          <input
-            className="border border-zinc-300 rounded w-full p-2 mt-1"
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            autoComplete="new-password" /* Prevents saved password auto-fill */
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-primary text-white w-full py-2 rounded-md text-base mt-2 hover:bg-primary/90 transition"
-        >
-          {state === "Sign Up" ? "Create Account" : "Login"}
-        </button>
-
-        {state === "Sign Up" ? (
-          <p>
-            Already have an account?{" "}
-            <span
-              onClick={() => setState("Login")}
-              className="text-primary underline cursor-pointer"
-            >
-              Login here
-            </span>
-          </p>
-        ) : (
-          <p>
-            Want to create a new account?{" "}
-            <span
-              onClick={() => setState("Sign Up")}
-              className="text-primary underline cursor-pointer"
-            >
-              Click here
-            </span>
-          </p>
-        )}
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 
