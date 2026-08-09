@@ -55,9 +55,6 @@ const loginUser = async (req, res) => {
         const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
         const adminPassword = process.env.ADMIN_PASSWORD?.trim();
 
-        // Debug log to terminal
-        console.log(`[LOGIN ATTEMPT] Received Email: "${cleanEmail}" | ENV Admin Email: "${adminEmail}"`);
-
         if (adminEmail && adminPassword && cleanEmail === adminEmail && cleanPassword === adminPassword) {
             console.log("✅ Admin Logged In Successfully");
             const token = jwt.sign(
