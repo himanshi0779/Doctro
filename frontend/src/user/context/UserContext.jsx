@@ -7,7 +7,10 @@ export const UserContext = createContext();
 const UserContextProvider = (props) => {
 
     const currencySymbol = '$';
-    const backendUrl = import.meta.env?.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
+    
+    // Sanitize base URL by stripping any trailing slash
+    const rawBackendUrl = import.meta.env?.VITE_BACKEND_URL || process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
+    const backendUrl = rawBackendUrl.replace(/\/+$/, '');
     
     const [doctors, setDoctors] = useState([]);
     const [token, setToken] = useState(() => localStorage.getItem('token') || null);
@@ -25,8 +28,8 @@ const UserContextProvider = (props) => {
                 toast.error(data.message || "Failed to fetch doctors");
             }
         } catch (error) {
-            console.log("Fetch Doctors Error:", error);
-            toast.error(error.message);
+            console.error("Fetch Doctors Error:", error);
+            toast.error(error.response?.data?.message || error.message);
         }
     };
 
@@ -39,7 +42,6 @@ const UserContextProvider = (props) => {
 
         setLoadingUser(true);
         try {
-            // Send token in both standard Authorization header and custom token header
             const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, { 
                 headers: { 
                     token: token,
@@ -56,7 +58,6 @@ const UserContextProvider = (props) => {
             }
         } catch (error) {
             console.error("Profile Load Error:", error);
-            // Only notify the error without clearing session prematurely
             const msg = error.response?.data?.message || error.message;
             toast.error(msg);
         } finally {
