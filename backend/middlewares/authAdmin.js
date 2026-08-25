@@ -1,25 +1,41 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
-//admin authentication middleware
-const authAdmin= async (req,res,next)=>{
-    try{
-        const token=req.headers.atoken;
-        if (!token){
-            return res.json({success:false,message:'Not Authorized Login Again'})
+// Admin authentication middleware with strict identity verification
+const authAdmin = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        const token = req.headers.atoken || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not Authorized: Admin token missing. Please log in again.'
+            });
         }
-        const decoded= jwt.verify(token,process.env.JWT_SECRET);
-        if (!decoded || !decoded.email) {
-    return res.json({ success: false, message: "Not Authorized Login Again" });
-}
 
-        req.admin=decoded;
-        console.log("Decoded token",decoded);
-        console.log("Expected email:",process.env.ADMIN_EMAIL);
+        // Verify cryptographic signature
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Strict Admin Role and Email Verification
+        const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+        const tokenEmail = decoded.email?.trim().toLowerCase();
+
+        if (decoded.role !== 'admin' || tokenEmail !== adminEmail) {
+            return res.status(403).json({
+                success: false,
+                message: 'Access Denied: Super Admin permissions required.'
+            });
+        }
+
+        req.admin = decoded;
         next();
-    } catch(error) {
-        console.log(error)
-        res.json({success:false, message:error.message})
+    } catch (error) {
+        console.error('Admin Auth Middleware Error:', error.message);
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid or expired token. Please log in again.'
+        });
     }
-} 
+};
 
 export default authAdmin;

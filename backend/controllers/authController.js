@@ -3,63 +3,50 @@ import bcrypt from "bcrypt";
 import userModel from "../models/userModel.js";
 import doctorModel from "../models/doctorModel.js";
 
+const generateToken = (payload) => 
+  jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 1. Check if login matches ADMIN from .env
-    if (
-      email === process.env.ADMIN_EMAIL && 
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(
-        { email, role: "admin" },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
-      );
+    // Admin login
+    if (email === process.env.ADMIN_EMAIL) {
+      const isAdminMatch = await bcrypt.compare(password, process.env.ADMIN_PASSWORD);
+      if (!isAdminMatch) return res.status(401).json({ success: false, message: "Invalid admin credentials" });
+
+      const token = generateToken({ email, role: "admin" });
       return res.json({ success: true, token, role: "admin" });
     }
 
-    // 2. Check PATIENTS table
+    // Patient or Doctor
     let account = await userModel.findOne({ email });
     let role = "user";
 
-    // 3. Check DOCTORS table (if not a patient)
     if (!account) {
       account = await doctorModel.findOne({ email });
       role = "doctor";
     }
 
-    // If account doesn't exist in either
     if (!account) {
-      return res.json({ success: false, message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
-    // Verify password for Patient or Doctor
     const isMatch = await bcrypt.compare(password, account.password);
     if (!isMatch) {
-      return res.json({ success: false, message: "Invalid email or password" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
-    // Generate token
-    const token = jwt.sign(
-      { id: account._id, role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = generateToken({ id: account._id, role });
 
     return res.json({
       success: true,
       token,
       role,
-      user: {
-        id: account._id,
-        name: account.name,
-        email: account.email
-      }
+      user: { id: account._id, name: account.name, email: account.email }
     });
 
   } catch (error) {
-    return res.json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
