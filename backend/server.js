@@ -23,7 +23,6 @@ connectCloudinary();
 // Allowed Origins List
 const allowedOrigins = [
   "http://localhost:3000",
-  "http://localhost:5173",
   "https://doctroapp.vercel.app",
 ];
 
