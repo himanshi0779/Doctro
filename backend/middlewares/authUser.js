@@ -1,45 +1,52 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-// User (Patient) authentication middleware with RBAC
 const authUser = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
-        const token = req.headers.token || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
+  try {
+    const authHeader = req.headers.authorization;
+    const token =
+      authHeader && authHeader.startsWith("Bearer ")
+        ? authHeader.split(" ")[1]
+        : req.headers.token;
 
-        if (!token) {
-            return res.status(401).json({
-                success: false,
-                message: 'Not Authorized: User token missing. Please log in again.'
-            });
-        }
-
-        // Verify cryptographic signature
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Enforce Patient/User Role
-        if (decoded.role !== 'user') {
-            return res.status(403).json({
-                success: false,
-                message: 'Access Denied: Patient permissions required.'
-            });
-        }
-
-        // Attach userId to request object for downstream controllers
-        req.userId = decoded.id;
-        
-        // Backward compatibility fallback for controllers expecting req.body.userId
-        if (req.body && typeof req.body === 'object') {
-            req.body.userId = decoded.id;
-        }
-
-        next();
-    } catch (error) {
-        console.error("authUser Middleware Error:", error.message);
-        return res.status(401).json({
-            success: false,
-            message: 'Invalid or expired token. Please log in again.'
-        });
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Access Denied: User token missing. Please log in.",
+      });
     }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is missing in environment variables!");
+      return res.status(500).json({
+        success: false,
+        message: "Internal server configuration error.",
+      });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role !== "user") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Patient permissions required.",
+      });
+    }
+    req.userId = decoded.id;
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Session expired. Please log in again.",
+      });
+    }
+
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or tampered token. Please log in again.",
+    });
+  }
 };
 
 export default authUser;

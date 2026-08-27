@@ -16,21 +16,22 @@ import userRouter from "./routes/userRoute.js";
 const app = express();
 const port = process.env.PORT || 4000;
 
-// Initialize external services
 connectDB();
 connectCloudinary();
 
-// Allowed Origins List
+export const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
 const allowedOrigins = [
   "http://localhost:3000",
   "https://doctroapp.vercel.app",
-];
+]
 
-// Robust CORS Configuration
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (Postman, mobile apps, curl, server-to-server)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -48,38 +49,49 @@ app.use(
       "atoken",
       "token",
       "dtoken",
-      "aToken",
     ],
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Razorpay Instance
-export const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
+app.get("/", (req, res) => {
+  res.status(200).json({ success: true, message: "API working" });
 });
 
-// Routes
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
 app.use("/api/user", userRouter);
 
-app.get("/", (req, res) => {
-  res.send("API working");
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Cannot ${req.method} ${req.originalUrl}`,
+  });
 });
 
-// CORS Error Handler
 app.use((err, req, res, next) => {
+  console.error("Unhandled Error:", err.message);
+
   if (err.message === "Not allowed by CORS") {
     return res.status(403).json({ success: false, message: err.message });
   }
-  res.status(500).json({ success: false, message: "Internal Server Error" });
+
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({
+      success: false,
+      message: "File size exceeds the 5MB limit",
+    });
+  }
+
+  return res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
 });
 
-// Start server locally (Vercel manages execution in production)
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => console.log(`Server Started at port ${port}`));
 }

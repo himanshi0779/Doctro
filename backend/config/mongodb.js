@@ -1,13 +1,34 @@
 import mongoose from "mongoose";
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(`${process.env.MONGODB_URL}/doctro`);
-    console.log(`MongoDB connected: ${conn.connection.host}, DB: ${conn.connection.name}`);
-  } catch (error) {
-    console.error("MongoDB connection error:", error.message);
-    process.exit(1);
-  }
-};
+let cached = global.mongoose || { conn: null, promise: null };
 
+const connectDB = async () => {
+  if (cached.conn) {
+    return cached.conn;
+  }
+  if (!cached.promise) {
+    const opts = {
+      dbName: "doctro",
+      bufferCommands: false,
+      maxPoolSize: 10,       
+      serverSelectionTimeoutMS: 5000,
+    };
+
+    cached.promise = mongoose.connect(process.env.MONGODB_URL, opts).then((mongooseInstance) => {
+      console.log("Connected to MongoDB");
+      return mongooseInstance;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null; 
+    console.error("MongoDB connection error:", error.message);
+    throw error;
+  }
+
+  global.mongoose = cached;
+  return cached.conn;
+};
 export default connectDB;

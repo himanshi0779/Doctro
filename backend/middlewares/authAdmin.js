@@ -1,22 +1,30 @@
 import jwt from 'jsonwebtoken';
 
-// Admin authentication middleware with strict identity verification
 const authAdmin = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        const token = req.headers.atoken || (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
+        const atoken = (authHeader && authHeader.startsWith('Bearer '))
+            ? authHeader.split(' ')[1]
+            : req.headers.atoken;
 
-        if (!token) {
+        if (!atoken) {
             return res.status(401).json({
                 success: false,
-                message: 'Not Authorized: Admin token missing. Please log in again.'
+                message: 'Not Authorized: Admin token missing. Please log in.'
             });
         }
 
-        // Verify cryptographic signature
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!process.env.JWT_SECRET) {
+            console.error("Critical Error: JWT_SECRET is not set in environment variables!");
+            return res.status(500).json({
+                success: false,
+                message: 'Internal server configuration error.'
+            });
+        }
 
-        // Strict Admin Role and Email Verification
+        // 3. Cryptographically verify the token
+        const decoded = jwt.verify(atoken, process.env.JWT_SECRET);
+
         const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
         const tokenEmail = decoded.email?.trim().toLowerCase();
 
@@ -29,11 +37,18 @@ const authAdmin = async (req, res, next) => {
 
         req.admin = decoded;
         next();
+
     } catch (error) {
-        console.error('Admin Auth Middleware Error:', error.message);
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({
+                success: false,
+                message: 'Session expired. Please log in again.'
+            });
+        }
+
         return res.status(401).json({
             success: false,
-            message: 'Invalid or expired token. Please log in again.'
+            message: 'Invalid or tampered token. Please log in again.'
         });
     }
 };

@@ -1,14 +1,23 @@
-import multer from "multer";
+import multer from 'multer';
 
-const storage=multer.diskStorage({
-    destination: function(req, file, callback) {
-        callback(null, "uploads/");
-    },
-    filename: function(req,file,callback){
-        callback(null, Date.now() + "-" + file.originalname);
-    },
+const storage = multer.memoryStorage();
+
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type! Only JPEG, PNG, and WEBP images are allowed.'), false); // Reject file
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
+  fileFilter: fileFilter
 });
 
-const upload= multer({storage})
-
-export default upload
+export default upload;
