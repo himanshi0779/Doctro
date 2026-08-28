@@ -56,7 +56,9 @@ const doctorSchema = new mongoose.Schema(
     slots_booked: { 
       type: Object, 
       default: {} 
-    }
+    },
+    resetOtp: { type: String, default: "" },
+resetOtpExpireAt: { type: Number, default: 0 },
   },
   { 
     minimize: false,
