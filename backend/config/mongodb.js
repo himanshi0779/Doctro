@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-// 1. Enable buffering globally so Mongoose safely queues queries until connection is open
+// 1. Global buffering enabled for serverless execution
 mongoose.set("bufferCommands", true);
 
-// 2. Persist cached reference in the global object immediately
+// 2. Persist cached connection across serverless invocations
 let cached = global.mongoose;
 
 if (!cached) {
@@ -11,7 +11,6 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  // Check if connection is active and ready
   if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
@@ -19,7 +18,7 @@ const connectDB = async () => {
   if (!cached.promise) {
     const opts = {
       dbName: "doctro",
-      bufferCommands: true, // ✅ MUST BE TRUE FOR SERVERLESS
+      bufferCommands: true,
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
     };
@@ -30,12 +29,10 @@ const connectDB = async () => {
       throw new Error("MONGODB_URL / MONGODB_URI is missing from environment variables.");
     }
 
-    cached.promise = mongoose
-      .connect(mongoUri, opts)
-      .then((mongooseInstance) => {
-        console.log("Connected to MongoDB");
-        return mongooseInstance;
-      });
+    cached.promise = mongoose.connect(mongoUri, opts).then((mongooseInstance) => {
+      console.log("Connected to MongoDB");
+      return mongooseInstance;
+    });
   }
 
   try {
