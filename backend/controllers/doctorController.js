@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
-
+import connectDB from "../config/mongodb.js";
 
 const changeAvailability = async (req, res) => {
   try {
+    await connectDB();
     const docId = req.admin ? req.body.docId : req.doctorId;
 
     if (!docId) {
@@ -35,6 +36,7 @@ const changeAvailability = async (req, res) => {
 
 const doctorList = async (req, res) => {
   try {
+    await connectDB();
     const doctors = await doctorModel
       .find({ available: true })
       .select(["-password", "-email"])
@@ -49,6 +51,7 @@ const doctorList = async (req, res) => {
 
 const appointmentsDoctor = async (req, res) => {
   try {
+    await connectDB();
     const docId = req.doctorId;
     const appointments = await appointmentModel
       .find({ docId })
@@ -64,6 +67,7 @@ const appointmentsDoctor = async (req, res) => {
 
 const appointmentComplete = async (req, res) => {
   try {
+    await connectDB();
     const docId = req.doctorId;
     const { appointmentId } = req.body;
 
@@ -99,6 +103,7 @@ const appointmentComplete = async (req, res) => {
 
 const appointmentCancel = async (req, res) => {
   try {
+    await connectDB();
     const docId = req.doctorId;
     const { appointmentId } = req.body;
 
@@ -136,6 +141,7 @@ const appointmentCancel = async (req, res) => {
 
 const doctorDashboard = async (req, res) => {
   try {
+    await connectDB();
     const docId = new mongoose.Types.ObjectId(req.doctorId);
 
     const [statsResult, latestAppointments] = await Promise.all([
@@ -179,6 +185,7 @@ const doctorDashboard = async (req, res) => {
 
 const doctorProfile = async (req, res) => {
   try {
+    await connectDB();
     const docId = req.doctorId;
     const profileData = await doctorModel.findById(docId).select("-password").lean();
 
@@ -195,6 +202,7 @@ const doctorProfile = async (req, res) => {
 
 const updateDoctorProfile = async (req, res) => {
   try {
+    await connectDB();
     const docId = req.doctorId;
     const { fees, address, available, about } = req.body;
 

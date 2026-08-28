@@ -1,4 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
+
 import express from "express";
 import cors from "cors";
 import Razorpay from "razorpay";
@@ -51,15 +55,16 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Serverless DB Connection Middleware: Ensures DB is ready before any route executes
+// Serverless DB Connection Middleware: Ensures DB is ready before any controller runs
 app.use(async (req, res, next) => {
   try {
     await connectDB();
     next();
   } catch (err) {
+    console.error("Database connection failure:", err.message);
     return res.status(500).json({
       success: false,
-      message: "Database connection failed. Please try again.",
+      message: "Database connection failed",
     });
   }
 });
