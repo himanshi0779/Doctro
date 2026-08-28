@@ -8,22 +8,27 @@ const NavBar = () => {
   const { token, setToken } = useContext(UserContext);
   const [showMenu, setShowMenu] = useState(false);
 
-  // Check if user is logged in
+  // Authentication check
   const activeToken = token || localStorage.getItem("token");
   const isAuthenticated = Boolean(
-    activeToken && activeToken !== "null" && activeToken !== "undefined" && activeToken !== ""
+    activeToken &&
+      activeToken !== "null" &&
+      activeToken !== "undefined" &&
+      activeToken !== ""
   );
 
+  // Dark mode state initialization
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
 
   useEffect(() => {
+    const root = document.documentElement;
     if (darkMode) {
-      document.documentElement.classList.add("dark");
+      root.classList.add("dark");
       localStorage.setItem("theme", "dark");
     } else {
-      document.documentElement.classList.remove("dark");
+      root.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
@@ -33,23 +38,23 @@ const NavBar = () => {
   };
 
   const logout = () => {
-    if (setToken) setToken(null);
+    if (setToken) setToken("");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("aToken");
     localStorage.removeItem("dToken");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   return (
-    <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-gray-300 dark:border-gray-700 px-4 sm:px-6 lg:px-0">
+    <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 px-4 sm:px-6 lg:px-0 transition-colors duration-200">
       
-      {/* Logo */}
+      {/* Brand Logo */}
       <img
         onClick={() => navigate('/')}
         className="h-14 w-auto cursor-pointer object-contain"
         src={assets.logo}
-        alt="Logo"
+        alt="Doctor App Logo"
       />
 
       {/* Desktop Navigation Links */}
@@ -60,12 +65,16 @@ const NavBar = () => {
           { name: 'ABOUT US', path: '/about' },
           { name: 'CONTACT US', path: '/contact' },
         ].map((item, idx) => (
-          <NavLink key={idx} to={item.path} className="flex flex-col items-center">
+          <NavLink
+            key={idx}
+            to={item.path}
+            className="flex flex-col items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
             {({ isActive }) => (
               <>
                 <li className="py-1">{item.name}</li>
                 {isActive && (
-                  <hr className="h-0.5 w-3/5 bg-primary border-none mt-1" />
+                  <hr className="h-0.5 w-3/5 bg-[#5F65FF] border-none mt-0.5" />
                 )}
               </>
             )}
@@ -73,10 +82,10 @@ const NavBar = () => {
         ))}
       </ul>
 
-      {/* Right Section */}
+      {/* Right Action Section */}
       <div className="flex items-center gap-4">
 
-        {/* Dark/Light Toggle Button */}
+        {/* Dark/Light Mode Toggle */}
         <button
           onClick={toggleDarkMode}
           aria-label="Toggle Dark Mode"
@@ -93,82 +102,107 @@ const NavBar = () => {
           )}
         </button>
 
-        {/* Desktop Conditional Button: Logout vs Create Account */}
+        {/* Desktop Conditional Action Button */}
         {isAuthenticated ? (
           <button
             onClick={logout}
-            className="hidden md:block bg-primary text-white px-8 py-2.5 rounded-full font-medium hover:bg-primary/90 transition cursor-pointer"
+            className="hidden md:block bg-[#5F65FF] hover:bg-blue-600 text-white px-8 py-2.5 rounded-full font-medium transition cursor-pointer"
           >
             Logout
           </button>
         ) : (
           <button
             onClick={() => navigate('/login')}
-            className="hidden md:block bg-primary text-white px-8 py-2.5 rounded-full font-medium hover:bg-primary/90 transition cursor-pointer"
+            className="hidden md:block bg-[#5F65FF] hover:bg-blue-600 text-white px-8 py-2.5 rounded-full font-medium transition cursor-pointer"
           >
             Create account
           </button>
         )}
 
         {/* Mobile Menu Icon */}
-        <img
+        <button
           onClick={() => setShowMenu(true)}
-          className="w-6 md:hidden cursor-pointer"
-          src={assets.menu_icon}
-          alt="Menu"
-        />
-      </div>
-
-      {/* Mobile Menu Drawer */}
-      <div
-        className={`fixed top-0 right-0 h-full z-50 bg-white dark:bg-gray-800 transition-all duration-300
-        ${showMenu ? 'w-full max-w-[300px]' : 'w-0 overflow-hidden'}`}
-      >
-        <div className="flex items-center justify-between px-5 py-6 border-b border-gray-200 dark:border-gray-700">
-          <img className="w-32" src={assets.logo} alt="Logo" />
+          className="md:hidden p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 cursor-pointer"
+          aria-label="Open navigation menu"
+        >
           <img
-            className="w-7 cursor-pointer"
-            onClick={() => setShowMenu(false)}
-            src={assets.cross_icon}
-            alt="Close"
+            className="w-5 h-5 dark:invert"
+            src={assets.menu_icon}
+            alt="Menu"
           />
-        </div>
-
-        <ul className="flex flex-col items-start gap-4 mt-6 px-6 text-lg font-medium">
-          <NavLink to="/" onClick={() => setShowMenu(false)}>
-            <p className="py-2">HOME</p>
-          </NavLink>
-          <NavLink to="/doctors" onClick={() => setShowMenu(false)}>
-            <p className="py-2">ALL DOCTORS</p>
-          </NavLink>
-          <NavLink to="/about" onClick={() => setShowMenu(false)}>
-            <p className="py-2">ABOUT</p>
-          </NavLink>
-          <NavLink to="/contact" onClick={() => setShowMenu(false)}>
-            <p className="py-2">CONTACT</p>
-          </NavLink>
-
-          {/* Mobile Conditional Button */}
-          {isAuthenticated ? (
-            <button
-              onClick={logout}
-              className="bg-primary text-white px-6 py-2.5 rounded-full mt-4 w-full text-base cursor-pointer hover:bg-primary/90 transition"
-            >
-              Logout
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setShowMenu(false);
-                navigate('/login');
-              }}
-              className="bg-primary text-white px-6 py-2.5 rounded-full mt-4 w-full text-base cursor-pointer hover:bg-primary/90 transition"
-            >
-              Create account
-            </button>
-          )}
-        </ul>
+        </button>
       </div>
+
+      {/* Mobile Drawer */}
+      {showMenu && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs md:hidden animate-fadeIn">
+          <div className="h-full w-full max-w-[300px] bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-6 flex flex-col justify-between shadow-2xl border-l border-gray-200 dark:border-gray-800 animate-slide-right">
+            <div>
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between pb-6 border-b border-gray-200 dark:border-gray-700">
+                <img className="w-32 object-contain" src={assets.logo} alt="Logo" />
+                <button
+                  onClick={() => setShowMenu(false)}
+                  className="p-1 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <img src={assets.cross_icon} alt="Close" className="w-6 h-6 dark:invert" />
+                </button>
+              </div>
+
+              {/* Drawer Links */}
+              <ul className="flex flex-col gap-3 mt-6 text-base font-medium">
+                {[
+                  { name: 'HOME', path: '/' },
+                  { name: 'ALL DOCTORS', path: '/doctors' },
+                  { name: 'ABOUT US', path: '/about' },
+                  { name: 'CONTACT US', path: '/contact' },
+                ].map((item, idx) => (
+                  <NavLink
+                    key={idx}
+                    to={item.path}
+                    onClick={() => setShowMenu(false)}
+                    className={({ isActive }) =>
+                      `py-2 px-3 rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-blue-50 dark:bg-gray-800 text-blue-600 dark:text-blue-400 font-semibold'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-800/60'
+                      }`
+                    }
+                  >
+                    {item.name}
+                  </NavLink>
+                ))}
+              </ul>
+            </div>
+
+            {/* Mobile Action Button */}
+            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
+              {isAuthenticated ? (
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    logout();
+                  }}
+                  className="bg-[#5F65FF] hover:bg-blue-600 text-white px-6 py-2.5 rounded-full w-full text-base font-medium cursor-pointer transition shadow-md"
+                >
+                  Logout
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate('/login');
+                  }}
+                  className="bg-[#5F65FF] hover:bg-blue-600 text-white px-6 py-2.5 rounded-full w-full text-base font-medium cursor-pointer transition shadow-md"
+                >
+                  Create account
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

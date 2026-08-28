@@ -43,14 +43,16 @@ const UserContextProvider = (props) => {
     [token]
   );
 
-  const logoutUser = () => {
+  const logoutUser = useCallback(() => {
     setToken("");
     setRole("");
     setUserData(null);
     setAppointments([]);
     localStorage.removeItem("token");
-    localStorage.removeItem("role");
-  };
+    if (localStorage.getItem("role") === "user") {
+      localStorage.removeItem("role");
+    }
+  }, []);
 
   // 1. Fetch public doctors list
   const getDoctorsData = useCallback(async () => {
@@ -99,7 +101,7 @@ const UserContextProvider = (props) => {
     } finally {
       setLoadingUser(false);
     }
-  }, [token, role, backendUrl, getAuthHeaders]);
+  }, [token, role, backendUrl, getAuthHeaders, logoutUser]);
 
   // 3. Fetch user appointments
   const getUserAppointments = useCallback(async () => {
@@ -118,9 +120,13 @@ const UserContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get User Appointments Error:", error);
-      toast.error(error.response?.data?.message || error.message);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        logoutUser();
+      } else {
+        toast.error(error.response?.data?.message || error.message);
+      }
     }
-  }, [token, role, backendUrl, getAuthHeaders]);
+  }, [token, role, backendUrl, getAuthHeaders, logoutUser]);
 
   // 4. Cancel appointment
   const cancelAppointment = async (appointmentId) => {
@@ -144,11 +150,15 @@ const UserContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Cancel Appointment Error:", error);
-      toast.error(error.response?.data?.message || error.message);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        logoutUser();
+      } else {
+        toast.error(error.response?.data?.message || error.message);
+      }
     }
   };
 
-  // Sync token changes safely without overwriting admin/doctor roles
+  // Sync token changes safely across app state and storage
   useEffect(() => {
     if (token) {
       const activeRole = localStorage.getItem("role");
@@ -159,13 +169,34 @@ const UserContextProvider = (props) => {
         loadUserProfileData();
       }
     } else {
+      localStorage.removeItem("token");
+      if (localStorage.getItem("role") === "user") {
+        localStorage.removeItem("role");
+      }
+      setRole("");
       setUserData(null);
+      setAppointments([]);
     }
   }, [token, loadUserProfileData]);
 
+  // Initial public data load
   useEffect(() => {
     getDoctorsData();
   }, [getDoctorsData]);
+
+  // Handle storage changes across multiple browser tabs
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "token") {
+        setToken(e.newValue || "");
+      }
+      if (e.key === "role") {
+        setRole(e.newValue || "");
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const value = {
     doctors,

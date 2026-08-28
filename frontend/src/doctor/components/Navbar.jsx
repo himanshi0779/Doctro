@@ -1,5 +1,4 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { AppContext } from '../../AppContext';
 import { assets } from '../../assets/assets';
 import { useNavigate } from 'react-router-dom';
 import { DoctorContext } from '../context/DoctorContext';
@@ -8,6 +7,15 @@ const Navbar = () => {
   const { dToken, setDToken } = useContext(DoctorContext);
   const navigate = useNavigate();
   const [showSidebar, setShowSidebar] = useState(false);
+
+  // Determine authentication status
+  const activeToken = dToken || localStorage.getItem('dToken');
+  const isAuthenticated = Boolean(
+    activeToken &&
+      activeToken !== 'null' &&
+      activeToken !== 'undefined' &&
+      activeToken !== ''
+  );
 
   // Dark mode state initialization
   const [darkMode, setDarkMode] = useState(() => {
@@ -30,14 +38,12 @@ const Navbar = () => {
   };
 
   const logout = () => {
-    if (dToken) {
-      if (setDToken) setDToken('');
-      localStorage.removeItem('dToken');
-      localStorage.removeItem('token');
-      localStorage.removeItem('aToken');
-      localStorage.removeItem('role');
-      window.location.href = "/login";
-    }
+    if (setDToken) setDToken('');
+    localStorage.removeItem('dToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('aToken');
+    localStorage.removeItem('role');
+    window.location.href = "/login";
   };
 
   return (
@@ -45,13 +51,18 @@ const Navbar = () => {
       
       {/* Logo and Role Info */}
       <div className='flex items-center gap-2'>
-        <img className='w-14 sm:w-14 cursor-pointer' src={assets.logo} alt="Logo" onClick={() => navigate('/doctor/dashboard')} />
+        <img
+          className='w-14 sm:w-14 cursor-pointer'
+          src={assets.logo}
+          alt="Logo"
+          onClick={() => navigate('/doctor/dashboard')}
+        />
         <p className='border px-2.5 py-0.5 rounded-full border-gray-500 dark:border-gray-400 text-gray-600 dark:text-gray-300 text-xs sm:text-sm whitespace-nowrap'>
-          {dToken ? 'Doctor' : 'Admin'}
+          Doctor
         </p>
       </div>
 
-      {/* Desktop Actions (Dark Mode Toggle + Logout) */}
+      {/* Desktop Actions (Dark Mode Toggle + Dynamic Auth Button) */}
       <div className='hidden md:flex items-center gap-4'>
         {/* Dark/Light Mode Toggle Button */}
         <button
@@ -72,12 +83,22 @@ const Navbar = () => {
           )}
         </button>
 
-        <button
-          onClick={logout}
-          className='bg-[#5F65FF] text-white text-sm px-6 py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer'
-        >
-          Logout
-        </button>
+        {/* Desktop Dynamic Action: Logout when logged in, Login when logged out */}
+        {isAuthenticated ? (
+          <button
+            onClick={logout}
+            className='bg-[#5F65FF] text-white text-sm px-6 py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer'
+          >
+            Logout
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className='bg-[#5F65FF] text-white text-sm px-6 py-2 rounded-full hover:bg-blue-600 transition-colors cursor-pointer'
+          >
+            Login
+          </button>
+        )}
       </div>
 
       {/* Mobile Controls (Dark Toggle + Menu Button) */}
@@ -132,12 +153,22 @@ const Navbar = () => {
             Profile
           </p>
           
-          <button
-            onClick={() => { logout(); setShowSidebar(false); }}
-            className='bg-[#5F65FF] text-white text-sm px-4 py-2 rounded-full mt-4 cursor-pointer hover:bg-blue-600 transition'
-          >
-            Logout
-          </button>
+          {/* Mobile Dynamic Auth Button */}
+          {isAuthenticated ? (
+            <button
+              onClick={() => { logout(); setShowSidebar(false); }}
+              className='bg-[#5F65FF] text-white text-sm px-4 py-2 rounded-full mt-4 cursor-pointer hover:bg-blue-600 transition'
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              onClick={() => { setShowSidebar(false); navigate('/login'); }}
+              className='bg-[#5F65FF] text-white text-sm px-4 py-2 rounded-full mt-4 cursor-pointer hover:bg-blue-600 transition'
+            >
+              Login
+            </button>
+          )}
         </div>
       )}
     </div>

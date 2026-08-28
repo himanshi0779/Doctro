@@ -33,7 +33,7 @@ const DoctorContextProvider = (props) => {
     [dToken]
   );
 
-  const logoutDoctor = () => {
+  const logoutDoctor = useCallback(() => {
     setDToken("");
     setAppointments([]);
     setDashData(null);
@@ -41,7 +41,23 @@ const DoctorContextProvider = (props) => {
     localStorage.removeItem("dToken");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-  };
+  }, []);
+
+  // Sync token changes to localStorage and clean up state when cleared
+  useEffect(() => {
+    if (dToken) {
+      localStorage.setItem("dToken", dToken);
+      localStorage.setItem("role", "doctor");
+    } else {
+      localStorage.removeItem("dToken");
+      if (localStorage.getItem("role") === "doctor") {
+        localStorage.removeItem("role");
+      }
+      setAppointments([]);
+      setDashData(null);
+      setProfileData(null);
+    }
+  }, [dToken]);
 
   const getAppointments = useCallback(async () => {
     if (!dToken) return;
@@ -57,9 +73,12 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get Appointments Error:", error);
+      if (error.response?.status === 401) {
+        logoutDoctor();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
-  }, [dToken, backendUrl, getHeaders]);
+  }, [dToken, backendUrl, getHeaders, logoutDoctor]);
 
   const completeAppointment = async (appointmentId) => {
     if (!dToken) return;
@@ -81,6 +100,9 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Complete Appointment Error:", error);
+      if (error.response?.status === 401) {
+        logoutDoctor();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
   };
@@ -105,6 +127,9 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Cancel Appointment Error:", error);
+      if (error.response?.status === 401) {
+        logoutDoctor();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
   };
@@ -123,9 +148,12 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get Dashboard Data Error:", error);
+      if (error.response?.status === 401) {
+        logoutDoctor();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
-  }, [dToken, backendUrl, getHeaders]);
+  }, [dToken, backendUrl, getHeaders, logoutDoctor]);
 
   const getProfileData = useCallback(async () => {
     if (!dToken) return;
@@ -141,9 +169,12 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get Profile Error:", error);
+      if (error.response?.status === 401) {
+        logoutDoctor();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
-  }, [dToken, backendUrl, getHeaders]);
+  }, [dToken, backendUrl, getHeaders, logoutDoctor]);
 
   const updateProfileData = async (updatePayload) => {
     if (!dToken) return;
@@ -163,17 +194,13 @@ const DoctorContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Update Profile Error:", error);
+      if (error.response?.status === 401) {
+        logoutDoctor();
+      }
       toast.error(error.response?.data?.message || error.message);
       return false;
     }
   };
-
-  useEffect(() => {
-    if (dToken) {
-      localStorage.setItem("dToken", dToken);
-      localStorage.setItem("role", "doctor");
-    }
-  }, [dToken]);
 
   const value = {
     dToken,

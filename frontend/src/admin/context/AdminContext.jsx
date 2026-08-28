@@ -33,7 +33,7 @@ const AdminContextProvider = (props) => {
     [aToken]
   );
 
-  const logoutAdmin = () => {
+  const logoutAdmin = useCallback(() => {
     setAToken("");
     setDoctors([]);
     setAppointments([]);
@@ -41,7 +41,23 @@ const AdminContextProvider = (props) => {
     localStorage.removeItem("aToken");
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-  };
+  }, []);
+
+  // Sync token changes to localStorage and clean up state when cleared
+  useEffect(() => {
+    if (aToken) {
+      localStorage.setItem("aToken", aToken);
+      localStorage.setItem("role", "admin");
+    } else {
+      localStorage.removeItem("aToken");
+      if (localStorage.getItem("role") === "admin") {
+        localStorage.removeItem("role");
+      }
+      setDoctors([]);
+      setAppointments([]);
+      setDashData(null);
+    }
+  }, [aToken]);
 
   const getAllDoctors = useCallback(async () => {
     if (!aToken) return;
@@ -57,9 +73,12 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get All Doctors Error:", error);
+      if (error.response?.status === 401) {
+        logoutAdmin();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
-  }, [aToken, backendUrl, getAuthHeaders]);
+  }, [aToken, backendUrl, getAuthHeaders, logoutAdmin]);
 
   const changeAvailability = async (docId) => {
     if (!aToken) return;
@@ -81,6 +100,9 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Change Availability Error:", error);
+      if (error.response?.status === 401) {
+        logoutAdmin();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
   };
@@ -99,9 +121,12 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get All Appointments Error:", error);
+      if (error.response?.status === 401) {
+        logoutAdmin();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
-  }, [aToken, backendUrl, getAuthHeaders]);
+  }, [aToken, backendUrl, getAuthHeaders, logoutAdmin]);
 
   const cancelAppointment = async (appointmentId) => {
     if (!aToken) return;
@@ -113,7 +138,6 @@ const AdminContextProvider = (props) => {
       );
       if (data.success) {
         toast.success(data.message);
-        // Local state update for immediate UI reflection
         setAppointments((prevAppts) =>
           prevAppts.map((item) =>
             item._id === appointmentId ? { ...item, cancelled: true } : item
@@ -124,6 +148,9 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Cancel Appointment Error:", error);
+      if (error.response?.status === 401) {
+        logoutAdmin();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
   };
@@ -142,22 +169,19 @@ const AdminContextProvider = (props) => {
       }
     } catch (error) {
       console.error("Get Dash Data Error:", error);
+      if (error.response?.status === 401) {
+        logoutAdmin();
+      }
       toast.error(error.response?.data?.message || error.message);
     }
-  }, [aToken, backendUrl, getAuthHeaders]);
-  
-  useEffect(() => {
-    if (aToken) {
-      localStorage.setItem("aToken", aToken);
-      localStorage.setItem("role", "admin");
-    }
-  }, [aToken]);
+  }, [aToken, backendUrl, getAuthHeaders, logoutAdmin]);
 
   const value = {
     aToken,
     setAToken,
     backendUrl,
     doctors,
+    setDoctors,
     getAllDoctors,
     changeAvailability,
     appointments,
@@ -165,6 +189,7 @@ const AdminContextProvider = (props) => {
     getAllAppointments,
     cancelAppointment,
     dashData,
+    setDashData,
     getDashData,
     logoutAdmin,
   };
