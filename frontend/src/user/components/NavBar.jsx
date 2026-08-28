@@ -5,12 +5,19 @@ import { UserContext } from '../context/UserContext';
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { setToken } = useContext(UserContext);
+  const { token, setToken } = useContext(UserContext);
   const [showMenu, setShowMenu] = useState(false);
+
+  // Check if user is logged in
+  const activeToken = token || localStorage.getItem("token");
+  const isAuthenticated = Boolean(
+    activeToken && activeToken !== "null" && activeToken !== "undefined" && activeToken !== ""
+  );
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
+
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -20,6 +27,7 @@ const NavBar = () => {
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
+
   const toggleDarkMode = () => {
     setDarkMode((prev) => !prev);
   };
@@ -33,9 +41,8 @@ const NavBar = () => {
     window.location.href = "/login";
   };
 
-
   return (
-    <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-gray-300 px-4 sm:px-6 lg:px-0">
+    <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-gray-300 dark:border-gray-700 px-4 sm:px-6 lg:px-0">
       
       {/* Logo */}
       <img
@@ -66,7 +73,7 @@ const NavBar = () => {
         ))}
       </ul>
 
-      {/* Right Section: Desktop Logout Button */}
+      {/* Right Section */}
       <div className="flex items-center gap-4">
 
         {/* Dark/Light Toggle Button */}
@@ -76,24 +83,32 @@ const NavBar = () => {
           className="p-2.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition cursor-pointer"
         >
           {darkMode ? (
-            /* Sun Icon for Light Mode */
             <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clipRule="evenodd" />
             </svg>
           ) : (
-            /* Moon Icon for Dark Mode */
             <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
               <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
             </svg>
           )}
         </button>
 
-        <button
-          onClick={logout}
-          className="hidden md:block bg-primary text-white px-8 py-2.5 rounded-full font-medium hover:bg-primary/90 transition cursor-pointer"
-        >
-          Logout
-        </button>
+        {/* Desktop Conditional Button: Logout vs Create Account */}
+        {isAuthenticated ? (
+          <button
+            onClick={logout}
+            className="hidden md:block bg-primary text-white px-8 py-2.5 rounded-full font-medium hover:bg-primary/90 transition cursor-pointer"
+          >
+            Logout
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="hidden md:block bg-primary text-white px-8 py-2.5 rounded-full font-medium hover:bg-primary/90 transition cursor-pointer"
+          >
+            Create account
+          </button>
+        )}
 
         {/* Mobile Menu Icon */}
         <img
@@ -106,10 +121,10 @@ const NavBar = () => {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full z-50 bg-white transition-all duration-300
+        className={`fixed top-0 right-0 h-full z-50 bg-white dark:bg-gray-800 transition-all duration-300
         ${showMenu ? 'w-full max-w-[300px]' : 'w-0 overflow-hidden'}`}
       >
-        <div className="flex items-center justify-between px-5 py-6 border-b">
+        <div className="flex items-center justify-between px-5 py-6 border-b border-gray-200 dark:border-gray-700">
           <img className="w-32" src={assets.logo} alt="Logo" />
           <img
             className="w-7 cursor-pointer"
@@ -133,13 +148,25 @@ const NavBar = () => {
             <p className="py-2">CONTACT</p>
           </NavLink>
 
-          {/* Mobile Logout Button */}
-          <button
-            onClick={logout}
-            className="bg-primary text-white px-6 py-2.5 rounded-full mt-4 w-full text-base cursor-pointer hover:bg-primary/90 transition"
-          >
-            Logout
-          </button>
+          {/* Mobile Conditional Button */}
+          {isAuthenticated ? (
+            <button
+              onClick={logout}
+              className="bg-primary text-white px-6 py-2.5 rounded-full mt-4 w-full text-base cursor-pointer hover:bg-primary/90 transition"
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                navigate('/login');
+              }}
+              className="bg-primary text-white px-6 py-2.5 rounded-full mt-4 w-full text-base cursor-pointer hover:bg-primary/90 transition"
+            >
+              Create account
+            </button>
+          )}
         </ul>
       </div>
     </div>
