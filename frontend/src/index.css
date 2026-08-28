@@ -3,8 +3,13 @@
 @tailwind utilities;
 
 /* -------------------------------------------------------------------------- */
-/* Complete Dark Mode Engine                                                 */
+/* Complete Dark Mode Engine                                                  */
 /* -------------------------------------------------------------------------- */
+
+/* 1. Root & Base Application Canvas */
+html.dark {
+  color-scheme: dark; /* Adapts native scrollbars, date pickers, & form controls */
+}
 
 html.dark, 
 html.dark body,
@@ -13,23 +18,20 @@ html.dark #root {
   color: #f3f4f6 !important;
 }
 
-/* 1. Catch all standard light background utility classes */
+/* 2. Catch standard light background surfaces */
 .dark .bg-white,
 .dark .bg-gray-50,
 .dark .bg-gray-100,
 .dark .bg-slate-50,
 .dark .bg-slate-100,
 .dark .bg-stone-50,
-.dark .bg-stone-100,
-.dark .bg-blue-50,
-.dark .bg-indigo-50,
-.dark .bg-sky-50 {
+.dark .bg-stone-100 {
   background-color: #1f2937 !important; /* dark:bg-gray-800 */
 }
 
-/* 2. Catch Prescrepto custom hex background colors (e.g. bg-[#F8F9FD]) */
-.dark [class*="bg-[#F"],
-.dark [class*="bg-[#f"] {
+/* Catch custom light hex background classes (e.g. bg-[#F8F9FD], bg-[#f4f7fc]) */
+.dark [class*="bg-[#f"],
+.dark [class*="bg-[#F"] {
   background-color: #111827 !important;
 }
 
@@ -38,17 +40,23 @@ html.dark #root {
 .dark .bg-slate-200,
 .dark .bg-stone-200,
 .dark .hover\:bg-gray-50:hover,
-.dark .hover\:bg-stone-50:hover {
+.dark .hover\:bg-stone-50:hover,
+.dark .hover\:bg-slate-50:hover {
   background-color: #374151 !important; /* dark:bg-gray-700 */
 }
 
 /* 4. Form inputs, dropdowns, & textareas */
-.dark input,
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
 .dark select,
 .dark textarea {
   background-color: #1f2937 !important;
   color: #ffffff !important;
   border-color: #4b5563 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af !important; /* gray-400 */
 }
 
 /* 5. Tables, lists, & table row borders */
@@ -59,11 +67,11 @@ html.dark #root {
   border-color: #374151 !important;
 }
 
-.dark tr:hover {
+.dark tbody tr:hover {
   background-color: #374151 !important;
 }
 
-/* 6. All light borders & dividers */
+/* 6. All standard light borders & dividers */
 .dark .border,
 .dark .border-b,
 .dark .border-t,
@@ -77,26 +85,89 @@ html.dark #root {
   border-color: #374151 !important;
 }
 
-/* 7. Text contrast fixes for headings & body copy */
+/* 7. Headings & High-contrast Text */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: #ffffff !important;
 }
 
-.dark p, 
-.dark span, 
-.dark li, 
-.dark label {
-  color: #e5e7eb;
+/* Scoped neutral text attenuation (protects colored badges & pills) */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-stone-900,
+.dark .text-stone-800 {
+  color: #f3f4f6 !important;
 }
 
-.dark .text-gray-400,
-.dark .text-gray-500,
 .dark .text-gray-600,
-.dark .text-gray-700,
-.dark .text-gray-800,
-.dark .text-stone-500,
-.dark .text-stone-600,
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-slate-600,
 .dark .text-slate-500,
-.dark .text-slate-600 {
-  color: #d1d5db !important;
+.dark .text-stone-600,
+.dark .text-stone-500 {
+  color: #9ca3af !important; /* gray-400 */
+}
+
+/* 8. Preserve Buttons with Solid Backgrounds */
+.dark button[class*="bg-blue-"],
+.dark button[class*="bg-indigo-"],
+.dark button[class*="bg-green-"],
+.dark button[class*="bg-red-"],
+.dark button[class*="bg-[#1155ff]"],
+.dark button[class*="bg-[#5F6FFF]"],
+.dark a[class*="bg-blue-"],
+.dark a[class*="bg-[#1155ff]"],
+.dark a[class*="bg-[#5F6FFF]"] {
+  color: #ffffff !important;
+}
+
+.dark button[class*="bg-blue-"] *,
+.dark button[class*="bg-[#1155ff]"] *,
+.dark button[class*="bg-[#5F6FFF]"] * {
+  color: #ffffff !important;
+}
+
+/* 9. Dark Mode Custom Scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* -------------------------------------------------------------------------- */
+/* React-Toastify Fixes (Click, Close Icon & Z-Index)                         */
+/* -------------------------------------------------------------------------- */
+
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
+.Toastify__close-button {
+  cursor: pointer !important;
+  opacity: 0.8 !important;
+  pointer-events: auto !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+.Toastify__close-button > svg {
+  pointer-events: none !important;
+  fill: currentColor !important;
 }

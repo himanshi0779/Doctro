@@ -57,7 +57,7 @@ const Footer = () => {
       <div className='mt-10'>
         <hr className='border-gray-300' />
         <p className='py-5 text-sm text-center text-gray-500'>
-          Copyright © 2025 GreatStack - All Rights Reserved.
+          Copyright © 2026 GreatStack - All Rights Reserved.
         </p>
       </div>
     </footer>

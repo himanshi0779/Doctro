@@ -1,7 +1,6 @@
+import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useContext } from "react";
 import { AdminContext } from "./context/AdminContext";
-import { ToastContainer } from "react-toastify";
 
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -14,32 +13,34 @@ import AllAppointments from "./pages/AllAppointments";
 function AdminApp() {
   const { aToken } = useContext(AdminContext);
 
-  // Require login for admin portal — redirect to unified /login if missing aToken
-  if (!aToken) {
+  // Guard against unauthenticated access with localStorage fallback
+  const activeToken = aToken || localStorage.getItem("aToken");
+  if (!activeToken) {
     return <Navigate to="/login" replace />;
   }
 
   return (
-    <div className="bg-[#F8F9FD]">
-      <ToastContainer />
-
+    <div className="bg-[#F8F9FD] min-h-screen">
       <Navbar />
+
       <div className="flex items-start">
         <Sidebar />
 
-        <Routes>
-          {/* Default admin route = dashboard */}
-          <Route index element={<Dashboard />} />
+        {/* Responsive Content Container */}
+        <main className="flex-1 min-w-0 p-2 sm:p-4 md:p-6 overflow-x-hidden">
+          <Routes>
+            {/* Default admin index route */}
+            <Route index element={<Dashboard />} />
 
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="all-appointments" element={<AllAppointments />} />
-          <Route path="add-doctor" element={<AddDoctor />} />
-          <Route path="doctor-list" element={<DoctorsList />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="all-appointments" element={<AllAppointments />} />
+            <Route path="add-doctor" element={<AddDoctor />} />
+            <Route path="doctor-list" element={<DoctorsList />} />
 
-          {/* Invalid admin URLs → redirect to dashboard */}
-          <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-        </Routes>
-
+            {/* Catch-all unmatched admin routes */}
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </Routes>
+        </main>
       </div>
     </div>
   );

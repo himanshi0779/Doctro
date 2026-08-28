@@ -1,42 +1,62 @@
+import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import UserApp from "./user/UserApp";
 import AdminApp from "./admin/AdminApp";
 import DoctorApp from "./doctor/DoctorApp";
-import UserLogin from "./user/pages/Login";
+import Login from "./Login";
 import ProtectedRoute from "./user/components/ProtectedRoute";
+import { AdminContext } from "./admin/context/AdminContext";
+import { DoctorContext } from "./doctor/context/DoctorContext";
+import { UserContext } from "./user/context/UserContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-  const role = localStorage.getItem("role");
-  const aToken = localStorage.getItem("aToken");
-  const dToken = localStorage.getItem("dToken");
-  const token = localStorage.getItem("token");
+  const { aToken } = useContext(AdminContext);
+  const { dToken } = useContext(DoctorContext);
+  const { token, role } = useContext(UserContext);
 
   const isValid = (t) => t && t !== "null" && t !== "undefined" && t !== "";
 
-  // Strictly check that BOTH the role and its specific token exist
+  // Dynamic active portal determination from React Context + localStorage fallback
   const getAuthenticatedHome = () => {
-    if (role === "admin" && isValid(aToken)) return "/admin";
-    if (role === "doctor" && isValid(dToken)) return "/doctor";
-    if (role === "user" && isValid(token)) return "/";
-    return null; // Stay on /login if role-specific token is missing!
+    const activeRole = role || localStorage.getItem("role");
+    const activeAToken = aToken || localStorage.getItem("aToken");
+    const activeDToken = dToken || localStorage.getItem("dToken");
+    const activeToken = token || localStorage.getItem("token");
+
+    if (activeRole === "admin" && isValid(activeAToken)) return "/admin";
+    if (activeRole === "doctor" && isValid(activeDToken)) return "/doctor";
+    if (activeRole === "user" && isValid(activeToken)) return "/";
+    return null;
   };
 
   const homePath = getAuthenticatedHome();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
-      <ToastContainer position="top-right" autoClose={3000} />
+      {/* Universal Toast Container configured for full clickability */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={true}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={true}
+        pauseOnHover={true}
+        style={{ zIndex: 99999 }}
+      />
 
       <Routes>
-        {/* Only redirect away from /login if the role-specific token actually exists */}
+        {/* Unified Login Route: redirects to portal if already authenticated */}
         <Route
           path="/login"
-          element={homePath ? <Navigate to={homePath} replace /> : <UserLogin />}
+          element={homePath ? <Navigate to={homePath} replace /> : <Login />}
         />
 
-        {/* Protected Admin Route */}
+        {/* Protected Admin Portal */}
         <Route
           path="/admin/*"
           element={
@@ -46,7 +66,7 @@ function App() {
           }
         />
 
-        {/* Protected Doctor Route */}
+        {/* Protected Doctor Portal */}
         <Route
           path="/doctor/*"
           element={
@@ -56,15 +76,8 @@ function App() {
           }
         />
 
-        {/* Protected Patient/User Route */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute allowedRole="user">
-              <UserApp />
-            </ProtectedRoute>
-          }
-        />
+        {/* Public & Patient Application */}
+        <Route path="/*" element={<UserApp />} />
       </Routes>
     </div>
   );
